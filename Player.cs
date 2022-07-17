@@ -15,6 +15,13 @@ public class Player : KinematicBody2D
     [Export] private int _additionalFallGravity = 4;
 
     private Vector2 _velocity = Vector2.Zero;
+    private AnimatedSprite _animatedSprite;
+
+    public override void _Ready()
+    {
+        _animatedSprite = GetNode<AnimatedSprite>("AnimatedSprite");
+        _animatedSprite.Frames = ResourceLoader.Load<SpriteFrames>("res://PlayerBlueSkin.tres");
+    }
 
     public override void _PhysicsProcess(float delta)
     {
@@ -26,10 +33,21 @@ public class Player : KinematicBody2D
         if (input.x == 0)
         {
             ApplyFriction();
+            _animatedSprite.Animation = "Idle";
         }
         else
         {
             ApplyAcceleration(input.x);
+            _animatedSprite.Animation = "Run";
+
+            if (input.x > 0)
+            {
+                _animatedSprite.FlipH = true;
+            }
+            else if (input.x < 0)
+            {
+                _animatedSprite.FlipH = false;
+            }
         }
 
         if (IsOnFloor())
@@ -41,6 +59,7 @@ public class Player : KinematicBody2D
         }
         else
         {
+            _animatedSprite.Animation = "Jump";
             if (Input.IsActionJustReleased("ui_up") && _velocity.y < _jumpReleaseForce)
 
             {
@@ -53,7 +72,16 @@ public class Player : KinematicBody2D
             }
         }
 
+        bool wasInAir = !IsOnFloor();
         _velocity = MoveAndSlide(_velocity, Vector2.Up);
+
+        bool justLanded = IsOnFloor() && wasInAir;
+
+        if (justLanded)
+        {
+            _animatedSprite.Animation = "Run";
+            _animatedSprite.Frame = 1;
+        }
     }
 
     private void ApplyGravity()
