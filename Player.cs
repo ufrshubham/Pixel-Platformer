@@ -1,19 +1,11 @@
 using Godot;
-using System;
 
 // For Matf.MoveToward: https://docs.godotengine.org/en/stable/tutorials/scripting/c_sharp/c_sharp_differences.html#tips
 using static Godot.Mathf;
 
 public class Player : KinematicBody2D
 {
-    [Export] private int _jumpForce = -130;
-    [Export] private int _jumpReleaseForce = -70;
-    [Export] private int _maxSpeed = 50;
-    [Export] private int _acceleration = 10;
-    [Export] private int _friction = 10;
-    [Export] private int _gravity = 4;
-    [Export] private int _additionalFallGravity = 4;
-    [Export] private int _maxGravity = 300;
+    [Export] private PlayerMovementData playerMovementData;
 
     private Vector2 _velocity = Vector2.Zero;
     private AnimatedSprite _animatedSprite;
@@ -48,21 +40,21 @@ public class Player : KinematicBody2D
         {
             if (Input.IsActionPressed("ui_up"))
             {
-                _velocity.y = _jumpForce;
+                _velocity.y = playerMovementData.jumpForce;
             }
         }
         else
         {
             _animatedSprite.Animation = "Jump";
-            if (Input.IsActionJustReleased("ui_up") && _velocity.y < _jumpReleaseForce)
+            if (Input.IsActionJustReleased("ui_up") && _velocity.y < playerMovementData.jumpReleaseForce)
 
             {
-                _velocity.y = _jumpReleaseForce;
+                _velocity.y = playerMovementData.jumpReleaseForce;
             }
 
             if (_velocity.y > 0)
             {
-                _velocity.y += _additionalFallGravity;
+                _velocity.y += playerMovementData.additionalFallGravity;
             }
         }
 
@@ -80,17 +72,17 @@ public class Player : KinematicBody2D
 
     private void ApplyGravity()
     {
-        _velocity.y += _gravity;
-        _velocity.y = Min(_velocity.y, _maxGravity);
+        _velocity.y += playerMovementData.gravity;
+        _velocity.y = Min(_velocity.y, playerMovementData.maxGravity);
     }
 
     private void ApplyFriction()
     {
-        _velocity.x = MoveToward(_velocity.x, 0, _friction);
+        _velocity.x = MoveToward(_velocity.x, 0, playerMovementData.friction);
     }
 
     private void ApplyAcceleration(float amount)
     {
-        _velocity.x = MoveToward(_velocity.x, _maxSpeed * amount, _acceleration);
+        _velocity.x = MoveToward(_velocity.x, playerMovementData.maxSpeed * amount, playerMovementData.acceleration);
     }
 }
