@@ -1,7 +1,6 @@
 using Godot;
-using System;
 
-public class Spikes : Area2D
+public class Hitbox : Area2D
 {
     public void OnBodyEntered(Node body)
     {
