@@ -15,15 +15,19 @@ public class Player : KinematicBody2D
     private State _state = State.MOVE;
     private Vector2 _velocity = Vector2.Zero;
     private int _doubleJump = 1;
+    private bool _bufferedJump = false;
 
     private AnimatedSprite _animatedSprite;
     private RayCast2D _ladderCheck;
+    private Timer _jumpBufferTimer;
 
     public override void _Ready()
     {
         _animatedSprite = GetNode<AnimatedSprite>("AnimatedSprite");
-        // _animatedSprite.Frames = ResourceLoader.Load<SpriteFrames>("res://PlayerBlueSkin.tres");
         _ladderCheck = GetNode<RayCast2D>("LadderCheck");
+        _jumpBufferTimer = GetNode<Timer>("JumpBufferTimer");
+
+        // _animatedSprite.Frames = ResourceLoader.Load<SpriteFrames>("res://PlayerBlueSkin.tres");
     }
 
     public override void _PhysicsProcess(float delta)
@@ -75,7 +79,7 @@ public class Player : KinematicBody2D
         return true;
     }
 
-    void MoveState(Vector2 input)
+    private void MoveState(Vector2 input)
     {
         if (IsOnLadder() && Input.IsActionPressed("ui_up"))
         {
@@ -101,16 +105,17 @@ public class Player : KinematicBody2D
         {
             _doubleJump = playerMovementData.doubleJumpCount;
 
-            if (Input.IsActionJustPressed("ui_up"))
+            if (Input.IsActionJustPressed("ui_up") || (_bufferedJump == true))
             {
                 _velocity.y = playerMovementData.jumpForce;
+                _bufferedJump = false;
             }
         }
         else
         {
             _animatedSprite.Animation = "Jump";
-            if (Input.IsActionJustReleased("ui_up") && _velocity.y < playerMovementData.jumpReleaseForce)
 
+            if (Input.IsActionJustReleased("ui_up") && _velocity.y < playerMovementData.jumpReleaseForce)
             {
                 _velocity.y = playerMovementData.jumpReleaseForce;
             }
@@ -119,6 +124,12 @@ public class Player : KinematicBody2D
             {
                 _velocity.y = playerMovementData.jumpForce;
                 _doubleJump -= 1;
+            }
+
+            if (Input.IsActionJustPressed("ui_up"))
+            {
+                _bufferedJump = true;
+                _jumpBufferTimer.Start();
             }
 
             if (_velocity.y > 0)
@@ -139,7 +150,7 @@ public class Player : KinematicBody2D
         }
     }
 
-    void ClimbState(Vector2 input)
+    private void ClimbState(Vector2 input)
     {
         if (!IsOnLadder())
         {
@@ -157,5 +168,11 @@ public class Player : KinematicBody2D
 
         _velocity = input * playerMovementData.climbSpeed;
         _velocity = MoveAndSlide(_velocity, Vector2.Up);
+    }
+
+    private void OnBufferJumpTimerTimeout()
+    {
+        GD.Print(_bufferedJump);
+        _bufferedJump = false;
     }
 }
