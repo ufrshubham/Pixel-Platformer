@@ -5,23 +5,83 @@ using static Godot.Mathf;
 
 public class Player : KinematicBody2D
 {
+    enum State
+    {
+        MOVE, CLIMB
+    }
+
+    State state = State.MOVE;
+
     [Export] private PlayerMovementData playerMovementData;
 
     private Vector2 _velocity = Vector2.Zero;
     private AnimatedSprite _animatedSprite;
+    private RayCast2D _ladderCheck;
 
     public override void _Ready()
     {
         _animatedSprite = GetNode<AnimatedSprite>("AnimatedSprite");
-        _animatedSprite.Frames = ResourceLoader.Load<SpriteFrames>("res://PlayerBlueSkin.tres");
+        // _animatedSprite.Frames = ResourceLoader.Load<SpriteFrames>("res://PlayerBlueSkin.tres");
+        _ladderCheck = GetNode<RayCast2D>("LadderCheck");
     }
 
     public override void _PhysicsProcess(float delta)
     {
-        ApplyGravity();
-
         Vector2 input = Vector2.Zero;
-        input.x = Input.GetActionStrength("ui_right") - Input.GetActionStrength("ui_left");
+        input.x = Input.GetAxis("ui_left", "ui_right");
+        input.y = Input.GetAxis("ui_up", "ui_down");
+
+        switch (state)
+        {
+            case State.MOVE:
+                MoveState(input);
+                break;
+            case State.CLIMB:
+                ClimbState(input);
+                break;
+        }
+    }
+
+    private void ApplyGravity()
+    {
+        _velocity.y += playerMovementData.gravity;
+        _velocity.y = Min(_velocity.y, playerMovementData.maxGravity);
+    }
+
+    private void ApplyFriction()
+    {
+        _velocity.x = MoveToward(_velocity.x, 0, playerMovementData.friction);
+    }
+
+    private void ApplyAcceleration(float amount)
+    {
+        _velocity.x = MoveToward(_velocity.x, playerMovementData.maxSpeed * amount, playerMovementData.acceleration);
+    }
+
+    private bool IsOnLadder()
+    {
+        if (!_ladderCheck.IsColliding())
+        {
+            return false;
+        }
+
+        var collider = _ladderCheck.GetCollider();
+        if (!(collider is Ladder))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    void MoveState(Vector2 input)
+    {
+        if (IsOnLadder() && Input.IsActionPressed("ui_up"))
+        {
+            state = State.CLIMB;
+        }
+
+        ApplyGravity();
 
         if (input.x == 0)
         {
@@ -70,19 +130,23 @@ public class Player : KinematicBody2D
         }
     }
 
-    private void ApplyGravity()
+    void ClimbState(Vector2 input)
     {
-        _velocity.y += playerMovementData.gravity;
-        _velocity.y = Min(_velocity.y, playerMovementData.maxGravity);
-    }
+        if (!IsOnLadder())
+        {
+            state = State.MOVE;
+        }
 
-    private void ApplyFriction()
-    {
-        _velocity.x = MoveToward(_velocity.x, 0, playerMovementData.friction);
-    }
+        if (input.Length() != 0)
+        {
+            _animatedSprite.Animation = "Run";
+        }
+        else
+        {
+            _animatedSprite.Animation = "Idle";
+        }
 
-    private void ApplyAcceleration(float amount)
-    {
-        _velocity.x = MoveToward(_velocity.x, playerMovementData.maxSpeed * amount, playerMovementData.acceleration);
+        _velocity = input * 50;
+        _velocity = MoveAndSlide(_velocity, Vector2.Up);
     }
 }
