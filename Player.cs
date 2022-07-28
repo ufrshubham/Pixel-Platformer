@@ -16,16 +16,19 @@ public class Player : KinematicBody2D
     private Vector2 _velocity = Vector2.Zero;
     private int _doubleJump = 1;
     private bool _bufferedJump = false;
+    private bool _coyoteJump = false;
 
     private AnimatedSprite _animatedSprite;
     private RayCast2D _ladderCheck;
     private Timer _jumpBufferTimer;
+    private Timer _coyoteJumpTimer;
 
     public override void _Ready()
     {
         _animatedSprite = GetNode<AnimatedSprite>("AnimatedSprite");
         _ladderCheck = GetNode<RayCast2D>("LadderCheck");
         _jumpBufferTimer = GetNode<Timer>("JumpBufferTimer");
+        _coyoteJumpTimer = GetNode<Timer>("CoyoteJumpTimer");
 
         // _animatedSprite.Frames = ResourceLoader.Load<SpriteFrames>("res://PlayerBlueSkin.tres");
     }
@@ -101,11 +104,11 @@ public class Player : KinematicBody2D
             _animatedSprite.FlipH = input.x > 0;
         }
 
-        if (IsOnFloor())
+        if (IsOnFloor() || _coyoteJump)
         {
             _doubleJump = playerMovementData.doubleJumpCount;
 
-            if (Input.IsActionJustPressed("ui_up") || (_bufferedJump == true))
+            if (Input.IsActionJustPressed("ui_up") || _bufferedJump)
             {
                 _velocity.y = playerMovementData.jumpForce;
                 _bufferedJump = false;
@@ -139,14 +142,23 @@ public class Player : KinematicBody2D
         }
 
         bool wasInAir = !IsOnFloor();
+        bool wasOnFloor = IsOnFloor();
+
         _velocity = MoveAndSlide(_velocity, Vector2.Up);
 
         bool justLanded = IsOnFloor() && wasInAir;
+        bool justLeftGround = !IsOnFloor() && wasOnFloor;
 
         if (justLanded)
         {
             _animatedSprite.Animation = "Run";
             _animatedSprite.Frame = 1;
+        }
+
+        if (justLeftGround && _velocity.y >= 0)
+        {
+            _coyoteJump = true;
+            _coyoteJumpTimer.Start();
         }
     }
 
@@ -172,7 +184,11 @@ public class Player : KinematicBody2D
 
     private void OnBufferJumpTimerTimeout()
     {
-        GD.Print(_bufferedJump);
         _bufferedJump = false;
+    }
+
+    private void OnCoyoteJumpTimerTimeout()
+    {
+        _coyoteJump = false;
     }
 }

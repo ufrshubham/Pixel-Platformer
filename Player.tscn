@@ -35,4 +35,9 @@ collide_with_bodies = false
 wait_time = 0.1
 one_shot = true
 
+[node name="CoyoteJumpTimer" type="Timer" parent="."]
+wait_time = 0.2
+one_shot = true
+
 [connection signal="timeout" from="JumpBufferTimer" to="." method="OnBufferJumpTimerTimeout"]
+[connection signal="timeout" from="CoyoteJumpTimer" to="." method="OnCoyoteJumpTimerTimeout"]
