@@ -91,54 +91,38 @@ public class Player : KinematicBody2D
 
         ApplyGravity();
 
-        if (input.x == 0)
-        {
-            ApplyFriction();
-            _animatedSprite.Animation = "Idle";
-        }
-        else
+        if (HorizontalMove(input))
         {
             ApplyAcceleration(input.x);
             _animatedSprite.Animation = "Run";
 
             _animatedSprite.FlipH = input.x > 0;
         }
-
-        if (IsOnFloor() || _coyoteJump)
+        else
         {
-            _doubleJump = playerMovementData.doubleJumpCount;
+            ApplyFriction();
+            _animatedSprite.Animation = "Idle";
+        }
 
-            if (Input.IsActionJustPressed("ui_up") || _bufferedJump)
-            {
-                _velocity.y = playerMovementData.jumpForce;
-                _bufferedJump = false;
-            }
+        if (IsOnFloor())
+        {
+            ResetDoubleJump();
         }
         else
         {
             _animatedSprite.Animation = "Jump";
+        }
 
-            if (Input.IsActionJustReleased("ui_up") && _velocity.y < playerMovementData.jumpReleaseForce)
-            {
-                _velocity.y = playerMovementData.jumpReleaseForce;
-            }
-
-            if (Input.IsActionJustPressed("ui_up") && _doubleJump > 0)
-            {
-                _velocity.y = playerMovementData.jumpForce;
-                _doubleJump -= 1;
-            }
-
-            if (Input.IsActionJustPressed("ui_up"))
-            {
-                _bufferedJump = true;
-                _jumpBufferTimer.Start();
-            }
-
-            if (_velocity.y > 0)
-            {
-                _velocity.y += playerMovementData.additionalFallGravity;
-            }
+        if (CanJump())
+        {
+            InputJump();
+        }
+        else
+        {
+            InputJumpRelease();
+            InputDoubleJump();
+            BufferJump();
+            FastFall();
         }
 
         bool wasInAir = !IsOnFloor();
@@ -180,6 +164,64 @@ public class Player : KinematicBody2D
 
         _velocity = input * playerMovementData.climbSpeed;
         _velocity = MoveAndSlide(_velocity, Vector2.Up);
+    }
+
+    private bool HorizontalMove(Vector2 input)
+    {
+        return input.x != 0;
+    }
+
+    private bool CanJump()
+    {
+        return IsOnFloor() || _coyoteJump;
+    }
+
+    private void ResetDoubleJump()
+    {
+        _doubleJump = playerMovementData.doubleJumpCount;
+    }
+
+    private void InputJump()
+    {
+        if (Input.IsActionJustPressed("ui_up") || _bufferedJump)
+        {
+            _velocity.y = playerMovementData.jumpForce;
+            _bufferedJump = false;
+        }
+    }
+
+    private void InputJumpRelease()
+    {
+        if (Input.IsActionJustReleased("ui_up") && _velocity.y < playerMovementData.jumpReleaseForce)
+        {
+            _velocity.y = playerMovementData.jumpReleaseForce;
+        }
+    }
+
+    private void InputDoubleJump()
+    {
+        if (Input.IsActionJustPressed("ui_up") && _doubleJump > 0)
+        {
+            _velocity.y = playerMovementData.jumpForce;
+            _doubleJump -= 1;
+        }
+    }
+
+    private void BufferJump()
+    {
+        if (Input.IsActionJustPressed("ui_up"))
+        {
+            _bufferedJump = true;
+            _jumpBufferTimer.Start();
+        }
+    }
+
+    private void FastFall()
+    {
+        if (_velocity.y > 0)
+        {
+            _velocity.y += playerMovementData.additionalFallGravity;
+        }
     }
 
     private void OnBufferJumpTimerTimeout()
