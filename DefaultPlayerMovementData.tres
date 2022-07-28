@@ -12,3 +12,5 @@ friction = 10
 gravity = 5
 additionalFallGravity = 2
 maxGravity = 300
+climbSpeed = 50
+doubleJumpCount = 1

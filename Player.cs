@@ -10,11 +10,12 @@ public class Player : KinematicBody2D
         MOVE, CLIMB
     }
 
-    State state = State.MOVE;
-
     [Export] private PlayerMovementData playerMovementData;
 
+    private State _state = State.MOVE;
     private Vector2 _velocity = Vector2.Zero;
+    private int _doubleJump = 1;
+
     private AnimatedSprite _animatedSprite;
     private RayCast2D _ladderCheck;
 
@@ -31,7 +32,7 @@ public class Player : KinematicBody2D
         input.x = Input.GetAxis("ui_left", "ui_right");
         input.y = Input.GetAxis("ui_up", "ui_down");
 
-        switch (state)
+        switch (_state)
         {
             case State.MOVE:
                 MoveState(input);
@@ -78,7 +79,7 @@ public class Player : KinematicBody2D
     {
         if (IsOnLadder() && Input.IsActionPressed("ui_up"))
         {
-            state = State.CLIMB;
+            _state = State.CLIMB;
         }
 
         ApplyGravity();
@@ -98,7 +99,9 @@ public class Player : KinematicBody2D
 
         if (IsOnFloor())
         {
-            if (Input.IsActionPressed("ui_up"))
+            _doubleJump = playerMovementData.doubleJumpCount;
+
+            if (Input.IsActionJustPressed("ui_up"))
             {
                 _velocity.y = playerMovementData.jumpForce;
             }
@@ -110,6 +113,12 @@ public class Player : KinematicBody2D
 
             {
                 _velocity.y = playerMovementData.jumpReleaseForce;
+            }
+
+            if (Input.IsActionJustPressed("ui_up") && _doubleJump > 0)
+            {
+                _velocity.y = playerMovementData.jumpForce;
+                _doubleJump -= 1;
             }
 
             if (_velocity.y > 0)
@@ -134,7 +143,7 @@ public class Player : KinematicBody2D
     {
         if (!IsOnLadder())
         {
-            state = State.MOVE;
+            _state = State.MOVE;
         }
 
         if (input.Length() != 0)
@@ -146,7 +155,7 @@ public class Player : KinematicBody2D
             _animatedSprite.Animation = "Idle";
         }
 
-        _velocity = input * 50;
+        _velocity = input * playerMovementData.climbSpeed;
         _velocity = MoveAndSlide(_velocity, Vector2.Up);
     }
 }
