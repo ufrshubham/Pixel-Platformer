@@ -22,6 +22,7 @@ public class Player : KinematicBody2D
     private RayCast2D _ladderCheck;
     private Timer _jumpBufferTimer;
     private Timer _coyoteJumpTimer;
+    private SoundPlayer _soundPlayer;
 
     public override void _Ready()
     {
@@ -29,6 +30,8 @@ public class Player : KinematicBody2D
         _ladderCheck = GetNode<RayCast2D>("LadderCheck");
         _jumpBufferTimer = GetNode<Timer>("JumpBufferTimer");
         _coyoteJumpTimer = GetNode<Timer>("CoyoteJumpTimer");
+        _soundPlayer = GetNode<SoundPlayer>("/root/SoundPlayer");
+
 
         // _animatedSprite.Frames = ResourceLoader.Load<SpriteFrames>("res://PlayerBlueSkin.tres");
     }
@@ -185,6 +188,7 @@ public class Player : KinematicBody2D
     {
         if (Input.IsActionJustPressed("ui_up") || _bufferedJump)
         {
+            _soundPlayer.PlaySound(SoundPlayer.SoundEffect.Jump);
             _velocity.y = playerMovementData.jumpForce;
             _bufferedJump = false;
         }
@@ -202,6 +206,7 @@ public class Player : KinematicBody2D
     {
         if (Input.IsActionJustPressed("ui_up") && _doubleJump > 0)
         {
+            _soundPlayer.PlaySound(SoundPlayer.SoundEffect.Jump);
             _velocity.y = playerMovementData.jumpForce;
             _doubleJump -= 1;
         }
@@ -232,5 +237,11 @@ public class Player : KinematicBody2D
     private void OnCoyoteJumpTimerTimeout()
     {
         _coyoteJump = false;
+    }
+
+    public void PlayerDie()
+    {
+        _soundPlayer.PlaySound(SoundPlayer.SoundEffect.Hurt);
+        GetTree().ReloadCurrentScene();
     }
 }
