@@ -6,7 +6,7 @@ public class Hitbox : Area2D
     {
         if (body is Player)
         {
-            GetTree().ReloadCurrentScene();
+            (body as Player).PlayerDie();
         }
     }
 }
