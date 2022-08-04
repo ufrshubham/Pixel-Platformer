@@ -17,7 +17,7 @@ public class World : Node2D
         _player = GetNode<Player>("Player");
         _timer = GetNode<Timer>("PlayerRespawnTimer");
         _events = GetNode<Events>("/root/Events");
-        _playerScene = ResourceLoader.Load<PackedScene>("res://Player.tscn");
+        _playerScene = ResourceLoader.Load<PackedScene>("res://scenes/Player.tscn");
 
         _playerSpawnLocation = _player.Position;
         _player.ConnectCamera(_camera2D);

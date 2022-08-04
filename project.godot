@@ -11,13 +11,17 @@ config_version=4
 [application]
 
 config/name="Learn-PixelPlatformer"
-run/main_scene="res://World.tscn"
-config/icon="res://icon.png"
+run/main_scene="res://scenes/World.tscn"
+config/icon="res://images/icon.png"
+
+[audio]
+
+default_bus_layout="res://resources/default_bus_layout.tres"
 
 [autoload]
 
-SoundPlayer="*res://SoundPlayer.tscn"
-Events="*res://Events.cs"
+SoundPlayer="*res://scenes/SoundPlayer.tscn"
+Events="*res://scripts/Events.cs"
 
 [display]
 
@@ -94,4 +98,4 @@ common/enable_pause_aware_picking=true
 
 [rendering]
 
-environment/default_environment="res://default_env.tres"
+environment/default_environment="res://resources/default_env.tres"

@@ -1,13 +1,13 @@
 [gd_scene load_steps=11 format=2]
 
-[ext_resource path="res://TileMap.tscn" type="PackedScene" id=1]
-[ext_resource path="res://Player.tscn" type="PackedScene" id=2]
-[ext_resource path="res://Spikes.tscn" type="PackedScene" id=3]
-[ext_resource path="res://World.cs" type="Script" id=4]
-[ext_resource path="res://WalkingEnemy.tscn" type="PackedScene" id=5]
-[ext_resource path="res://Ladder.tscn" type="PackedScene" id=6]
-[ext_resource path="res://MovingSpikeEnemy.tscn" type="PackedScene" id=7]
-[ext_resource path="res://CheckPoint.tscn" type="PackedScene" id=8]
+[ext_resource path="res://scenes/TileMap.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scenes/Player.tscn" type="PackedScene" id=2]
+[ext_resource path="res://scenes/WalkingEnemy.tscn" type="PackedScene" id=3]
+[ext_resource path="res://scenes/CheckPoint.tscn" type="PackedScene" id=4]
+[ext_resource path="res://scenes/Ladder.tscn" type="PackedScene" id=5]
+[ext_resource path="res://scenes/MovingSpikeEnemy.tscn" type="PackedScene" id=6]
+[ext_resource path="res://scenes/Spikes.tscn" type="PackedScene" id=7]
+[ext_resource path="res://scripts/World.cs" type="Script" id=8]
 
 [sub_resource type="Curve2D" id=1]
 _data = {
@@ -20,7 +20,7 @@ _data = {
 }
 
 [node name="World" type="Node2D"]
-script = ExtResource( 4 )
+script = ExtResource( 8 )
 
 [node name="TileMap" parent="." instance=ExtResource( 1 )]
 collision_mask = 0
@@ -30,38 +30,38 @@ tile_data = PoolIntArray( 20, 0, 0, 21, 0, 0, 22, 0, 0, 23, 0, 0, 24, 0, 0, 25, 
 position = Vector2( 90, 135 )
 z_index = 10
 
-[node name="Spikes" parent="." instance=ExtResource( 3 )]
+[node name="Spikes" parent="." instance=ExtResource( 7 )]
 position = Vector2( 207, 128 )
 
-[node name="Spikes2" parent="." instance=ExtResource( 3 )]
+[node name="Spikes2" parent="." instance=ExtResource( 7 )]
 position = Vector2( 36, 128 )
 
-[node name="WalkingEnemy" parent="." instance=ExtResource( 5 )]
+[node name="WalkingEnemy" parent="." instance=ExtResource( 3 )]
 position = Vector2( 450, 90 )
 
-[node name="Ladder" parent="." instance=ExtResource( 6 )]
+[node name="Ladder" parent="." instance=ExtResource( 5 )]
 position = Vector2( 340, 92 )
 
-[node name="Ladder2" parent="." instance=ExtResource( 6 )]
+[node name="Ladder2" parent="." instance=ExtResource( 5 )]
 position = Vector2( 340, 74 )
 
-[node name="Ladder3" parent="." instance=ExtResource( 6 )]
+[node name="Ladder3" parent="." instance=ExtResource( 5 )]
 position = Vector2( 340, 56 )
 
-[node name="Ladder4" parent="." instance=ExtResource( 6 )]
+[node name="Ladder4" parent="." instance=ExtResource( 5 )]
 position = Vector2( 340, 38 )
 
-[node name="Ladder5" parent="." instance=ExtResource( 6 )]
+[node name="Ladder5" parent="." instance=ExtResource( 5 )]
 position = Vector2( 340, 20 )
 
-[node name="Ladder6" parent="." instance=ExtResource( 6 )]
+[node name="Ladder6" parent="." instance=ExtResource( 5 )]
 position = Vector2( 340, 2 )
 
-[node name="MovingSpikeEnemy" parent="." instance=ExtResource( 7 )]
+[node name="MovingSpikeEnemy" parent="." instance=ExtResource( 6 )]
 position = Vector2( 20, 23 )
 curve = SubResource( 1 )
 
-[node name="MovingSpikeEnemy2" parent="." instance=ExtResource( 7 )]
+[node name="MovingSpikeEnemy2" parent="." instance=ExtResource( 6 )]
 position = Vector2( 396, 108 )
 curve = SubResource( 2 )
 animationType = 1
@@ -72,10 +72,10 @@ current = true
 [node name="PlayerRespawnTimer" type="Timer" parent="."]
 one_shot = true
 
-[node name="CheckPoint" parent="." instance=ExtResource( 8 )]
+[node name="CheckPoint" parent="." instance=ExtResource( 4 )]
 position = Vector2( 243, 54 )
 
-[node name="CheckPoint2" parent="." instance=ExtResource( 8 )]
+[node name="CheckPoint2" parent="." instance=ExtResource( 4 )]
 position = Vector2( 455, 0 )
 
 [connection signal="timeout" from="PlayerRespawnTimer" to="." method="OnPlayerRespawnTimerTimeout"]
