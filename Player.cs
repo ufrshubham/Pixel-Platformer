@@ -7,7 +7,8 @@ public class Player : KinematicBody2D
 {
     enum State
     {
-        MOVE, CLIMB
+        MOVE,
+        CLIMB
     }
 
     [Export] private PlayerMovementData playerMovementData;
@@ -22,7 +23,9 @@ public class Player : KinematicBody2D
     private RayCast2D _ladderCheck;
     private Timer _jumpBufferTimer;
     private Timer _coyoteJumpTimer;
+    private RemoteTransform2D _remoteTransform2D;
     private SoundPlayer _soundPlayer;
+    private Events _events;
 
     public override void _Ready()
     {
@@ -30,8 +33,10 @@ public class Player : KinematicBody2D
         _ladderCheck = GetNode<RayCast2D>("LadderCheck");
         _jumpBufferTimer = GetNode<Timer>("JumpBufferTimer");
         _coyoteJumpTimer = GetNode<Timer>("CoyoteJumpTimer");
+        _remoteTransform2D = GetNode<RemoteTransform2D>("RemoteTransform2D");
+        
         _soundPlayer = GetNode<SoundPlayer>("/root/SoundPlayer");
-
+        _events = GetNode<Events>("/root/Events");
 
         // _animatedSprite.Frames = ResourceLoader.Load<SpriteFrames>("res://PlayerBlueSkin.tres");
     }
@@ -51,6 +56,19 @@ public class Player : KinematicBody2D
                 ClimbState(input);
                 break;
         }
+    }
+
+    public void PlayerDie()
+    {
+        _soundPlayer.PlaySound(SoundPlayer.SoundEffect.Hurt);
+        QueueFree();
+        _events.EmitSignal("PlayerDied");
+    }
+
+    public void ConnectCamera(Camera2D camera2D)
+    {
+        NodePath cameraPath = camera2D.GetPath();
+        _remoteTransform2D.RemotePath = cameraPath;
     }
 
     private void ApplyGravity()
@@ -237,11 +255,5 @@ public class Player : KinematicBody2D
     private void OnCoyoteJumpTimerTimeout()
     {
         _coyoteJump = false;
-    }
-
-    public void PlayerDie()
-    {
-        _soundPlayer.PlaySound(SoundPlayer.SoundEffect.Hurt);
-        GetTree().ReloadCurrentScene();
     }
 }
