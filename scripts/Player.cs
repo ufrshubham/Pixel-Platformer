@@ -34,7 +34,7 @@ public class Player : KinematicBody2D
         _jumpBufferTimer = GetNode<Timer>("JumpBufferTimer");
         _coyoteJumpTimer = GetNode<Timer>("CoyoteJumpTimer");
         _remoteTransform2D = GetNode<RemoteTransform2D>("RemoteTransform2D");
-        
+
         _soundPlayer = GetNode<SoundPlayer>("/root/SoundPlayer");
         _events = GetNode<Events>("/root/Events");
 
@@ -105,7 +105,7 @@ public class Player : KinematicBody2D
 
     private void MoveState(Vector2 input)
     {
-        if (IsOnLadder() && Input.IsActionPressed("ui_up"))
+        if (IsOnLadder() && Input.IsActionJustPressed("ui_up"))
         {
             _state = State.CLIMB;
         }
@@ -134,16 +134,19 @@ public class Player : KinematicBody2D
             _animatedSprite.Animation = "Jump";
         }
 
-        if (CanJump())
+        if (!IsOnLadder())
         {
-            InputJump();
-        }
-        else
-        {
-            InputJumpRelease();
-            InputDoubleJump();
-            BufferJump();
-            FastFall();
+            if (CanJump())
+            {
+                InputJump();
+            }
+            else
+            {
+                InputJumpRelease();
+                InputDoubleJump();
+                BufferJump();
+                FastFall();
+            }
         }
 
         bool wasInAir = !IsOnFloor();
