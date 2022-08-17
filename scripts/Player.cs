@@ -50,7 +50,7 @@ public class Player : KinematicBody2D
         switch (_state)
         {
             case State.MOVE:
-                MoveState(input);
+                MoveState(input, delta);
                 break;
             case State.CLIMB:
                 ClimbState(input);
@@ -71,20 +71,20 @@ public class Player : KinematicBody2D
         _remoteTransform2D.RemotePath = cameraPath;
     }
 
-    private void ApplyGravity()
+    private void ApplyGravity(float delta)
     {
-        _velocity.y += playerMovementData.gravity;
+        _velocity.y += playerMovementData.gravity * delta;
         _velocity.y = Min(_velocity.y, playerMovementData.maxGravity);
     }
 
-    private void ApplyFriction()
+    private void ApplyFriction(float delta)
     {
-        _velocity.x = MoveToward(_velocity.x, 0, playerMovementData.friction);
+        _velocity.x = MoveToward(_velocity.x, 0, playerMovementData.friction * delta);
     }
 
-    private void ApplyAcceleration(float amount)
+    private void ApplyAcceleration(float amount, float delta)
     {
-        _velocity.x = MoveToward(_velocity.x, playerMovementData.maxSpeed * amount, playerMovementData.acceleration);
+        _velocity.x = MoveToward(_velocity.x, playerMovementData.maxSpeed * amount, playerMovementData.acceleration * delta);
     }
 
     private bool IsOnLadder()
@@ -103,25 +103,25 @@ public class Player : KinematicBody2D
         return true;
     }
 
-    private void MoveState(Vector2 input)
+    private void MoveState(Vector2 input, float delta)
     {
         if (IsOnLadder() && Input.IsActionJustPressed("ui_up"))
         {
             _state = State.CLIMB;
         }
 
-        ApplyGravity();
+        ApplyGravity(delta);
 
         if (HorizontalMove(input))
         {
-            ApplyAcceleration(input.x);
+            ApplyAcceleration(input.x, delta);
             _animatedSprite.Animation = "Run";
 
             _animatedSprite.FlipH = input.x > 0;
         }
         else
         {
-            ApplyFriction();
+            ApplyFriction(delta);
             _animatedSprite.Animation = "Idle";
         }
 
@@ -145,7 +145,7 @@ public class Player : KinematicBody2D
                 InputJumpRelease();
                 InputDoubleJump();
                 BufferJump();
-                FastFall();
+                FastFall(delta);
             }
         }
 
@@ -242,11 +242,11 @@ public class Player : KinematicBody2D
         }
     }
 
-    private void FastFall()
+    private void FastFall(float delta)
     {
         if (_velocity.y > 0)
         {
-            _velocity.y += playerMovementData.additionalFallGravity;
+            _velocity.y += playerMovementData.additionalFallGravity * delta;
         }
     }
 
