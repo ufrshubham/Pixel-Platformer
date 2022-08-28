@@ -1,6 +1,6 @@
 using Godot;
 
-public class World : Node2D
+public class Level : Node2D
 {
     private Camera2D _camera2D;
     private Player _player;
