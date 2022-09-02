@@ -18,6 +18,7 @@ public class Player : KinematicBody2D
     private int _doubleJump = 1;
     private bool _bufferedJump = false;
     private bool _coyoteJump = false;
+    public bool OnDoor = false;
 
     private AnimatedSprite _animatedSprite;
     private RayCast2D _ladderCheck;
@@ -207,6 +208,7 @@ public class Player : KinematicBody2D
 
     private void InputJump()
     {
+        if (OnDoor) return;
         if (Input.IsActionJustPressed("ui_up") || _bufferedJump)
         {
             _soundPlayer.PlaySound(SoundPlayer.SoundEffect.Jump);

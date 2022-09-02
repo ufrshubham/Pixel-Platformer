@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Threading.Tasks;
 
 public class Door : Area2D
 {
@@ -7,17 +8,43 @@ public class Door : Area2D
     private String _targetLevelPath;
 
     private Transitions _transitions;
+    private Player _player;
 
     public override void _Ready()
     {
         _transitions = GetNode<Transitions>("/root/Transitions");
     }
 
-    private async void OnBodyEntered(Node body)
+    public override void _Process(float delta)
+    {
+        if (_player == null) return;
+        if (!_player.IsOnFloor()) return;
+
+        if (Input.IsActionJustPressed("ui_up"))
+        {
+            if (_targetLevelPath == null) return;
+            Task task = GoToNextRoom();
+        }
+    }
+
+    private void OnBodyEntered(Node body)
     {
         if (!(body is Player)) return;
-        if (_targetLevelPath == null) return;
 
+        _player = body as Player;
+        _player.OnDoor = true;
+        if (_targetLevelPath == null) return;
+    }
+
+    private void OnDoorBodyExited(Node body)
+    {
+        if (!(body is Player)) return;
+        _player.OnDoor = false;
+        _player = null;
+    }
+
+    private async Task GoToNextRoom()
+    {
         _transitions.PlayExitTransition();
         GetTree().Paused = true;
 
