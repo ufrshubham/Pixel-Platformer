@@ -2,6 +2,10 @@
 
 A 2D platformer made using [Godot](https://godotengine.org/) engine
 
+## Demo
+
+![Demo](demo/demo.gif)
+
 ## Requirements
 
 - Godot 3.4.4 Mono version
