@@ -93,6 +93,10 @@ ui_down={
 2d_physics/layer_1="World"
 2d_physics/layer_2="Characters"
 
+[mono]
+
+project/assembly_name="Learn-PixelPlatformer"
+
 [physics]
 
 common/enable_pause_aware_picking=true
